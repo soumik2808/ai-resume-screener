@@ -1,15 +1,27 @@
 # AI Resume Screener
 
-A simple Flask web app to upload PDF resumes and extract text content using PyPDF2.  
-Ideal for learning backend basics, file handling, and GitHub collaboration.
+A smart Flask-based web app to compare resumes with job descriptions using **KeyBERT** for keyword extraction and **PyMuPDF** for accurate PDF parsing.
 
-## Features
-- Upload `.pdf` resumes
-- Extract text from uploaded files
-- Built with Flask and PyPDF2
+## 🔍 Features
 
-## Setup Instructions
+- Upload both Resume PDF and Job Description PDF
+- Extracts and displays full text from both files
+- Uses KeyBERT to extract top keywords
+- Calculates a **Resume Match Score (out of 100)**
+- Highlights matched and missing skills
+
+## 🛠 Tech Stack
+
+- Python (Flask)
+- PyMuPDF for text extraction
+- KeyBERT + Sentence Transformers
+- HTML (Jinja2 templating)
+
+## 📦 Installation
+
 ```bash
+git clone https://github.com/soumik2808/ai-resume-screener.git
+cd ai-resume-screener
 python -m venv virtualenv
 virtualenv\Scripts\activate
 pip install -r requirements.txt
