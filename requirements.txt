@@ -3,3 +3,4 @@ sentence-transformers
 torch
 PyPDF2
 python-docx
+gunicorn
