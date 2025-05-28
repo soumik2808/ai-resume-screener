@@ -3,37 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <title>AI Resume Screener</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 30px;
+        max-width: 900px;
+        margin: auto;
+      }
+
+      h2,
+      h3 {
+        color: #333;
+      }
+
+      .matched-skill {
+        color: green;
+        font-weight: bold;
+      }
+
+      .missing-skill {
+        color: red;
+      }
+
+      .upload-section {
+        margin-bottom: 30px;
+      }
+
+      canvas {
+        max-width: 100%;
+        max-height: 300px;
+        display: block;
+        margin: 20px auto;
+      }
+
+      pre {
+        background-color: #fff;
+        padding: 10px;
+        border: 1px solid #ccc;
+        white-space: pre-wrap;
+        overflow-x: auto;
+      }
+    </style>
   </head>
   <body>
-    <h1>Upload Your Resume and Job Description</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <label>Resume PDF:</label><br />
-      <input type="file" name="resume" required /><br /><br />
+    <h2>AI Resume Screener</h2>
 
-      <label>Job Description (JD) PDF:</label><br />
-      <input type="file" name="jd" required /><br /><br />
+    <form
+      action="/upload"
+      method="POST"
+      enctype="multipart/form-data"
+      class="upload-section"
+    >
+      <p><strong>Upload Resume (.pdf or .docx):</strong></p>
+      <input
+        type="file"
+        name="resume"
+        accept=".pdf,.docx"
+        required
+      /><br /><br />
 
-      <input type="submit" value="Analyze" />
+      <p><strong>Upload Job Description (.pdf or .docx):</strong></p>
+      <input type="file" name="jd" accept=".pdf,.docx" required /><br /><br />
+
+      <button type="submit">Analyze</button>
     </form>
 
-    {% if score %}
-    <h2>Resume Score: {{ score }} / 100</h2>
-    <h3>Top Keywords:</h3>
+    {% if score is defined %}
+    <h3>Resume Score: {{ score }} / 100</h3>
+
+    <h3>Matched vs Missing Skills</h3>
+    <canvas id="resumeChart"></canvas>
+    <canvas id="jdChart"></canvas>
+
+    <h3>Resume Skills</h3>
     <ul>
-      {% for keyword in keywords %}
-      <li>{{ keyword }}</li>
+      {% for skill in matched %}
+      <li class="matched-skill">✔ {{ skill }}</li>
+      {% endfor %} {% for skill in missing %}
+      <li class="missing-skill">✘ {{ skill }}</li>
       {% endfor %}
     </ul>
 
-    <h3>Skill Gap Analysis:</h3>
-    <p><strong>Matched Skills:</strong> {{ matched }}</p>
-    <p><strong>Missing Skills:</strong> {{ missing }}</p>
-    {% endif %}
-    <hr />
+    <h3>JD Skills</h3>
+    <ul>
+      {% for skill in jd_matched %}
+      <li class="matched-skill">✔ {{ skill }}</li>
+      {% endfor %} {% for skill in jd_missing %}
+      <li class="missing-skill">✘ {{ skill }}</li>
+      {% endfor %}
+    </ul>
+
     <h3>Extracted Resume Text:</h3>
     <pre>{{ resume_text }}</pre>
 
-    <h3>Extracted Job Description Text:</h3>
+    <h3>Extracted JD Text:</h3>
     <pre>{{ jd_text }}</pre>
+
+    <script>
+      const resumeChart = document.getElementById('resumeChart').getContext('2d');
+      new Chart(resumeChart, {
+        type: 'pie',
+        data: {
+          labels: ['Matched', 'Missing'],
+          datasets: [{
+            data: [{{ matched|length }}, {{ missing|length }}],
+            backgroundColor: ['green', 'red']
+          }]
+        }
+      });
+
+      const jdChart = document.getElementById('jdChart').getContext('2d');
+      new Chart(jdChart, {
+        type: 'pie',
+        data: {
+          labels: ['Matched', 'Missing'],
+          datasets: [{
+            data: [{{ jd_matched|length }}, {{ jd_missing|length }}],
+            backgroundColor: ['blue', 'orange']
+          }]
+        }
+      });
+    </script>
+    {% endif %}
   </body>
 </html>
