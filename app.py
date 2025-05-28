@@ -1,33 +1,46 @@
 from flask import Flask, render_template, request
-import os
-from werkzeug.utils import secure_filename
-import PyPDF2
+import fitz  # PyMuPDF
+from keybert import KeyBERT
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+kw_model = KeyBERT()
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    message = ""
+def extract_text(file_storage):
     text = ""
-    if request.method == "POST":
-        resume = request.files.get("resume")
-        if resume:
-            filename = secure_filename(resume.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            resume.save(filepath)
+    with fitz.open(stream=file_storage.read(), filetype="pdf") as doc:
+        for page in doc:
+            text += page.get_text()
+    return text
 
-            if filename.endswith(".pdf"):
-                with open(filepath, "rb") as f:
-                    reader = PyPDF2.PdfReader(f)
-                    text = "\n".join([page.extract_text() or "" for page in reader.pages])
-            else:
-                text = "Only PDF parsing is currently supported."
+def extract_keywords(text, top_n=10):
+    return [kw for kw, _ in kw_model.extract_keywords(text, top_n=top_n)]
 
-            message = f"Resume uploaded successfully: {filename}"
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-    return render_template("index.html", message=message, text=text)
+@app.route('/upload', methods=['POST'])
+def upload():
+    resume_file = request.files['resume']
+    jd_file = request.files['jd']
 
-if __name__ == "__main__":
+    resume_text = extract_text(resume_file)
+    jd_text = extract_text(jd_file)
+
+    resume_keywords = set(extract_keywords(resume_text, top_n=15))
+    jd_keywords = set(extract_keywords(jd_text, top_n=15))
+
+    matched = resume_keywords & jd_keywords
+    missing = jd_keywords - resume_keywords
+    score = int((len(matched) / len(jd_keywords)) * 100) if jd_keywords else 0
+
+    return render_template('index.html',
+                       score=score,
+                       keywords=list(resume_keywords),
+                       matched=", ".join(matched),
+                       missing=", ".join(missing),
+                       resume_text=resume_text,
+                       jd_text=jd_text)
+
+if __name__ == '__main__':
     app.run(debug=True)

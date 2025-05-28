@@ -1,2 +1,5 @@
-flask
-werkzeug
+Flask
+keybert
+PyMuPDF
+sentence-transformers
+scikit-learn
