@@ -1,95 +1,131 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
-import os
-import fitz  # PyMuPDF for PDF
-import docx  # for .docx
 from sentence_transformers import SentenceTransformer, util
-import re
+import os
+import fitz  # PyMuPDF
+import docx
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+from fpdf import FPDF
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load Sentence-BERT model
+# Ensure uploads folder exists
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# 🔒 Register Jinja2 filter AFTER app = Flask(...) is defined
+@app.template_filter('b64encode')
+def b64encode_filter(data):
+    return base64.b64encode(data).decode('utf-8')
+
+# Load semantic model
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Sample tech-related skills (expand as needed)
-tech_skills = [
+# Define list of target keywords
+keywords_list = [
     "python", "flask", "django", "html", "css", "javascript", "sql", "mysql",
     "postgresql", "aws", "azure", "gcp", "docker", "kubernetes", "git", "linux",
-    "nlp", "data analysis", "machine learning", "deep learning", "tensorflow",
-    "pytorch", "scikit-learn", "communication", "leadership", "problem solving"
+    "data analysis", "machine learning", "deep learning", "tensorflow", "pytorch",
+    "scikit-learn", "communication", "leadership", "problem solving"
 ]
 
-# Extract text from .pdf or .docx
-def extract_text(file):
-    if file.filename.endswith('.pdf'):
-        with fitz.open(stream=file.read(), filetype="pdf") as doc:
-            text = ""
+# Extract text from PDF or DOCX
+def extract_text(file_storage):
+    filename = secure_filename(file_storage.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file_storage.save(filepath)
+
+    text = ""
+    if filename.endswith('.pdf'):
+        with fitz.open(filepath) as doc:
             for page in doc:
                 text += page.get_text()
-            return text
-    elif file.filename.endswith('.docx'):
-        doc = docx.Document(file)
-        return "\n".join(p.text for p in doc.paragraphs)
-    return ""
-
-# Clean and normalize text
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'[^a-z\s]', '', text)
+    elif filename.endswith('.docx'):
+        doc = docx.Document(filepath)
+        for para in doc.paragraphs:
+            text += para.text + "\n"
     return text
 
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
+# Extract top semantic keywords from text
+def extract_keywords(text, top_k=20):
+    embeddings = model.encode([text] + keywords_list, convert_to_tensor=True)
+    text_embedding = embeddings[0]
+    keyword_embeddings = embeddings[1:]
+    cosine_scores = util.cos_sim(text_embedding, keyword_embeddings)[0]
 
-@app.route("/upload", methods=["POST"])
-def upload():
-    resume_file = request.files.get("resume")
-    jd_file = request.files.get("jd")
+    scored_keywords = list(zip(keywords_list, cosine_scores))
+    scored_keywords.sort(key=lambda x: x[1], reverse=True)
+    top_keywords = [kw for kw, score in scored_keywords[:top_k]]
+    return top_keywords
 
-    if not resume_file or not jd_file:
-        return "Please upload both Resume and Job Description", 400
+# Create pie chart and return image bytes
+def generate_pie(matched, total, colors, labels):
+    fig, ax = plt.subplots()
+    ax.pie([matched, total - matched], labels=labels, colors=colors, autopct='%1.1f%%')
+    plt.tight_layout()
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    return buf.getvalue()
 
-    # Extract and clean
-    resume_text = clean_text(extract_text(resume_file))
-    jd_text = clean_text(extract_text(jd_file))
+# Home route with upload and analysis
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    resume_text = jd_text = ""
+    resume_keywords = jd_keywords = []
+    matched_resume = matched_jd = []
+    resume_score = 0
+    resume_pie = jd_pie = None
 
-    # Semantic similarity scores
-    embeddings_resume = model.encode([resume_text])[0]
-    matched_skills = []
-    missing_skills = []
+    if request.method == 'POST':
+        resume = request.files.get('resume')
+        jd = request.files.get('jd')
 
-    for skill in tech_skills:
-        sim = util.cos_sim(model.encode(skill), embeddings_resume)
-        if sim > 0.4:
-            matched_skills.append(skill)
-        else:
-            missing_skills.append(skill)
+        if resume and jd:
+            resume_text = extract_text(resume)
+            jd_text = extract_text(jd)
 
-    jd_matched = []
-    jd_missing = []
+            resume_keywords = extract_keywords(resume_text)
+            jd_keywords = extract_keywords(jd_text)
 
-    embeddings_jd = model.encode([jd_text])[0]
-    for skill in tech_skills:
-        sim = util.cos_sim(model.encode(skill), embeddings_jd)
-        if sim > 0.4:
-            jd_matched.append(skill)
-        else:
-            jd_missing.append(skill)
+            matched_resume = [kw for kw in resume_keywords if kw in jd_keywords]
+            matched_jd = [kw for kw in jd_keywords if kw in resume_keywords]
 
-    score = int((len(matched_skills) / len(tech_skills)) * 100)
+            resume_score = int(len(matched_resume) / len(jd_keywords) * 100) if jd_keywords else 0
+
+            resume_pie = generate_pie(len(matched_resume), len(jd_keywords), ['green', 'red'], ['Matched', 'Missing'])
+            jd_pie = generate_pie(len(matched_jd), len(resume_keywords), ['blue', 'orange'], ['Matched', 'Missing'])
 
     return render_template("index.html",
-                           score=score,
-                           resume_text=resume_text,
-                           jd_text=jd_text,
-                           matched=matched_skills,
-                           missing=missing_skills,
-                           jd_matched=jd_matched,
-                           jd_missing=jd_missing
-                           )
+        resume_text=resume_text,
+        jd_text=jd_text,
+        resume_keywords=resume_keywords,
+        jd_keywords=jd_keywords,
+        matched_resume=matched_resume,
+        matched_jd=matched_jd,
+        resume_score=resume_score,
+        resume_pie=resume_pie,
+        jd_pie=jd_pie
+    )
 
-if __name__ == "__main__":
+# Download sample CV (PDF generation)
+@app.route('/download-sample-cv')
+def download_sample_cv():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="John Doe", ln=True, align='L')
+    pdf.cell(200, 10, txt="Software Engineer | john@example.com | +91 1234567890", ln=True, align='L')
+    pdf.cell(200, 10, txt="Skills: Python, Flask, Django, SQL, Git", ln=True, align='L')
+    pdf.cell(200, 10, txt="Experience: Software Engineer at XYZ (2019 - Present)", ln=True, align='L')
+
+    file_path = os.path.join(UPLOAD_FOLDER, "sample_cv.pdf")
+    pdf.output(file_path)
+    return send_file(file_path, as_attachment=True)
+
+# ✅ Run the app
+if __name__ == '__main__':
     app.run(debug=True)

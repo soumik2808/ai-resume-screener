@@ -1,6 +1,8 @@
 flask
 sentence-transformers
 torch
-PyPDF2
+PyMuPDF
 python-docx
 gunicorn
+matplotlib
+fpdf
