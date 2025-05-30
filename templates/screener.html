@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resume Screener</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: #f8f9fa;
+        padding: 40px;
+      }
+      .chart-img {
+        width: 250px;
+        height: auto;
+      }
+      pre {
+        background: #eee;
+        padding: 10px;
+        white-space: pre-wrap;
+      }
+      .matched {
+        color: green;
+      }
+      .missing {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="mb-4">🧠 Resume Screener</h2>
+
+      <form method="POST" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+          <label class="form-label">Upload Resume (.pdf or .docx):</label>
+          <input class="form-control" type="file" name="resume" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label"
+            >Upload Job Description (.pdf or .docx):</label
+          >
+          <input class="form-control" type="file" name="jd" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Analyze</button>
+        <a href="/" class="btn btn-secondary ms-2">← Back to Home</a>
+      </form>
+
+      {% if resume_score %}
+      <h5>Resume Score: {{ resume_score }} / 100</h5>
+
+      <div class="d-flex gap-4 my-4 justify-content-center">
+        {% if resume_pie %}
+        <img
+          class="chart-img"
+          src="data:image/png;base64,{{ resume_pie | b64encode }}"
+        />
+        {% endif %} {% if jd_pie %}
+        <img
+          class="chart-img"
+          src="data:image/png;base64,{{ jd_pie | b64encode }}"
+        />
+        {% endif %}
+      </div>
+
+      <h6>Resume Skills:</h6>
+      <ul>
+        {% for kw in resume_keywords %}
+        <li
+          class="{% if kw in matched_resume %}matched{% else %}missing{% endif %}"
+        >
+          {% if kw in matched_resume %}✔{% else %}✘{% endif %} {{ kw }}
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h6>JD Skills:</h6>
+      <ul>
+        {% for kw in jd_keywords %}
+        <li
+          class="{% if kw in matched_jd %}matched{% else %}missing{% endif %}"
+        >
+          {% if kw in matched_jd %}✔{% else %}✘{% endif %} {{ kw }}
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h6>Extracted Resume Text:</h6>
+      <pre>{{ resume_text }}</pre>
+
+      <h6>Extracted JD Text:</h6>
+      <pre>{{ jd_text }}</pre>
+      {% endif %}
+    </div>
+  </body>
+</html>

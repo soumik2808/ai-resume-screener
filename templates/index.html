@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>AI Resume Screener</title>
+    <title>AI Resume Tool - Home</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -10,106 +10,32 @@
     <style>
       body {
         background: #f8f9fa;
-        padding: 40px;
+        padding-top: 60px;
       }
-      .container {
-        max-width: 900px;
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
+      .card {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
-      .chart-img {
-        width: 250px;
-        height: auto;
-      }
-      .section-title {
-        margin-top: 40px;
-        font-weight: bold;
-        font-size: 1.25rem;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 8px;
-      }
-      pre {
-        background: #eee;
-        padding: 10px;
-        white-space: pre-wrap;
-      }
-      .matched {
-        color: green;
-      }
-      .missing {
-        color: red;
+      .btn {
+        font-size: 1.1rem;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2 class="mb-4">🧠 AI Resume Screener</h2>
-
-      <form method="POST" enctype="multipart/form-data" class="mb-4">
-        <div class="mb-3">
-          <label class="form-label">Upload Resume (.pdf or .docx):</label>
-          <input class="form-control" type="file" name="resume" required />
+    <div class="container text-center">
+      <h1 class="mb-4">🧠 AI Resume Tool</h1>
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h3>Select a Feature</h3>
+            <a href="/screener" class="btn btn-primary w-100 my-2"
+              >📄 Resume Screener</a
+            >
+            <a href="/builder" class="btn btn-success w-100 my-2"
+              >🛠️ Resume Builder</a
+            >
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label"
-            >Upload Job Description (.pdf or .docx):</label
-          >
-          <input class="form-control" type="file" name="jd" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Analyze</button>
-        <a href="/download-sample-cv" class="btn btn-success ms-2"
-          >📄 Download Sample CV</a
-        >
-      </form>
-
-      {% if resume_score %}
-      <h5 class="mt-4">Resume Score: {{ resume_score }} / 100</h5>
-
-      <div class="section-title">Matched vs Missing Skills</div>
-      <div class="d-flex gap-4 justify-content-center">
-        {% if resume_pie %}
-        <img
-          class="chart-img"
-          src="data:image/png;base64,{{ resume_pie | b64encode }}"
-        />
-        {% endif %} {% if jd_pie %}
-        <img
-          class="chart-img"
-          src="data:image/png;base64,{{ jd_pie | b64encode }}"
-        />
-        {% endif %}
       </div>
-
-      <div class="section-title">Resume Skills</div>
-      <ul>
-        {% for kw in resume_keywords %}
-        <li
-          class="{% if kw in matched_resume %}matched{% else %}missing{% endif %}"
-        >
-          {% if kw in matched_resume %}✔{% else %}✘{% endif %} {{ kw }}
-        </li>
-        {% endfor %}
-      </ul>
-
-      <div class="section-title">JD Skills</div>
-      <ul>
-        {% for kw in jd_keywords %}
-        <li
-          class="{% if kw in matched_jd %}matched{% else %}missing{% endif %}"
-        >
-          {% if kw in matched_jd %}✔{% else %}✘{% endif %} {{ kw }}
-        </li>
-        {% endfor %}
-      </ul>
-
-      <div class="section-title">Extracted Resume Text:</div>
-      <pre>{{ resume_text }}</pre>
-
-      <div class="section-title">Extracted JD Text:</div>
-      <pre>{{ jd_text }}</pre>
-      {% endif %}
     </div>
   </body>
 </html>
