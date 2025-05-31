@@ -54,9 +54,9 @@ git clone https://github.com/soumik2808/ai-resume-tool.git
 cd ai-resume-tool
 
 # Setup virtualenv (recommended)
-python -m venv venv
-venv\Scripts\activate      # On Windows
-# source venv/bin/activate # On macOS/Linux
+python -m venv virtualenv
+.\virtualenv\Scripts\activate      # On Windows
+# source virtualenv/bin/activate # On macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
