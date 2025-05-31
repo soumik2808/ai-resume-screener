@@ -7,6 +7,7 @@ A modular Flask-based web app to assist in all things related to resumes — fro
 ## 🔍 Features
 
 ### Resume Screener
+
 - Upload Resume and Job Description (PDF or DOCX)
 - Extracts and compares key skills using `KeyBERT`
 - Displays:
@@ -15,6 +16,7 @@ A modular Flask-based web app to assist in all things related to resumes — fro
   - Full Text Extraction (both resume and JD)
 
 ### Resume Builder
+
 - Fill a form to generate a clean PDF Resume
 - Download instantly from browser
 - No signup, no fuss
@@ -44,7 +46,6 @@ ai-resume-tool/
 ├── screener.html # Resume screener UI
 └── builder.html # Resume builder form
 
-
 ---
 
 ## 🚀 Installation
@@ -56,10 +57,11 @@ cd ai-resume-tool
 # Setup virtualenv (recommended)
 python -m venv virtualenv
 .\virtualenv\Scripts\activate      # On Windows
-# source virtualenv/bin/activate # On macOS/Linux
+source virtualenv/bin/activate # On macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run the app
 python app.py
+```
