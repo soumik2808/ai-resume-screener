@@ -1,28 +1,65 @@
-# AI Resume Screener
+# 🤖 AI Resume Tool
 
-A smart Flask-based web app to compare resumes with job descriptions using **KeyBERT** for keyword extraction and **PyMuPDF** for accurate PDF parsing.
+A modular Flask-based web app to assist in all things related to resumes — from smart screening with job descriptions to generating structured resumes via a form.
+
+---
 
 ## 🔍 Features
 
-- Upload both Resume PDF and Job Description PDF
-- Extracts and displays full text from both files
-- Uses KeyBERT to extract top keywords
-- Calculates a **Resume Match Score (out of 100)**
-- Highlights matched and missing skills
+### Resume Screener
+- Upload Resume and Job Description (PDF or DOCX)
+- Extracts and compares key skills using `KeyBERT`
+- Displays:
+  - Resume Match Score (out of 100)
+  - Matched vs Missing Skills
+  - Full Text Extraction (both resume and JD)
 
-## 🛠 Tech Stack
+### Resume Builder
+- Fill a form to generate a clean PDF Resume
+- Download instantly from browser
+- No signup, no fuss
 
-- Python (Flask)
-- PyMuPDF for text extraction
-- KeyBERT + Sentence Transformers
-- HTML (Jinja2 templating)
+---
 
-## 📦 Installation
+## ⚙️ Tech Stack
+
+- Python + Flask
+- Sentence Transformers (`all-MiniLM-L6-v2`)
+- PyMuPDF for PDF extraction
+- DOCX parsing via `python-docx`
+- Matplotlib (skill comparison pie charts)
+- Bootstrap 5 (for styling)
+
+---
+
+## 🗂 Folder Structure
+
+ai-resume-tool/
+├── app.py
+├── requirements.txt
+├── render.yaml
+├── uploads/ # User uploaded files
+└── templates/
+├── index.html # Homepage
+├── screener.html # Resume screener UI
+└── builder.html # Resume builder form
+
+
+---
+
+## 🚀 Installation
 
 ```bash
-git clone https://github.com/soumik2808/ai-resume-screener.git
-cd ai-resume-screener
-python -m venv virtualenv
-virtualenv\Scripts\activate
+git clone https://github.com/soumik2808/ai-resume-tool.git
+cd ai-resume-tool
+
+# Setup virtualenv (recommended)
+python -m venv venv
+venv\Scripts\activate      # On Windows
+# source venv/bin/activate # On macOS/Linux
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the app
 python app.py
