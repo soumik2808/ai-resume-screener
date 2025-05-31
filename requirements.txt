@@ -1,8 +1,7 @@
 flask
+gunicorn
 sentence-transformers
-torch
 PyMuPDF
 python-docx
-gunicorn
 matplotlib
 fpdf
