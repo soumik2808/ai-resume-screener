@@ -65,3 +65,12 @@ pip install -r requirements.txt
 # Run the app
 python app.py
 ```
+
+## 🧪 Running Tests
+
+Install `pytest` and run the test suite:
+
+```bash
+pip install pytest
+pytest
+```
