@@ -9,11 +9,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 from fpdf import FPDF
-<<<<<<< Updated upstream
 from config import DefaultConfig
-=======
-from sklearn.feature_extraction.text import TfidfVectorizer
->>>>>>> Stashed changes
 
 app = Flask(__name__)
 app.config.from_object(DefaultConfig)
