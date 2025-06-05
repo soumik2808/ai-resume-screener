@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 from fpdf import FPDF
+from config import DefaultConfig
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config.from_object(DefaultConfig)
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 @app.template_filter('b64encode')
 def b64encode_filter(data):
@@ -125,7 +125,7 @@ def builder():
         pdf.multi_cell(0, 10, txt=f"Experience:\n{experience}")
         pdf.multi_cell(0, 10, txt=f"Education:\n{education}")
 
-        file_path = os.path.join(UPLOAD_FOLDER, "built_resume.pdf")
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], "built_resume.pdf")
         pdf.output(file_path)
         response = send_file(file_path, as_attachment=True)
         os.remove(file_path)
@@ -134,4 +134,4 @@ def builder():
     return render_template("builder.html")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=app.config['DEBUG'])
