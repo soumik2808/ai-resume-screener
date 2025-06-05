@@ -42,6 +42,7 @@ def extract_text(file_storage):
         doc = docx.Document(filepath)
         for para in doc.paragraphs:
             text += para.text + "\n"
+    os.remove(filepath)
     return text
 
 def extract_keywords(text, top_k=20):
@@ -126,7 +127,9 @@ def builder():
 
         file_path = os.path.join(UPLOAD_FOLDER, "built_resume.pdf")
         pdf.output(file_path)
-        return send_file(file_path, as_attachment=True)
+        response = send_file(file_path, as_attachment=True)
+        os.remove(file_path)
+        return response
 
     return render_template("builder.html")
 
