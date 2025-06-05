@@ -62,6 +62,15 @@ source virtualenv/bin/activate # On macOS/Linux
 # Install dependencies
 pip install -r requirements.txt
 
+# The requirements file pins the library versions used by the app:
+# Flask==3.1.1
+# gunicorn==23.0.0
+# sentence-transformers==4.1.0
+# PyMuPDF==1.26.0
+# python-docx==1.1.2
+# matplotlib==3.10.3
+# fpdf==1.7.2
+
 # Run the app
 python app.py
 ```
