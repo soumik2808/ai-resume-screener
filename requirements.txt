@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 flask==3.1.1
 gunicorn==23.0.0
 sentence-transformers==4.1.0
@@ -5,3 +6,12 @@ PyMuPDF==1.26.0
 python-docx==1.1.2
 matplotlib==3.10.3
 fpdf==1.7.2
+=======
+flask
+gunicorn
+scikit-learn
+PyMuPDF
+python-docx
+matplotlib
+fpdf
+>>>>>>> Stashed changes
