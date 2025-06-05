@@ -10,6 +10,7 @@ from io import BytesIO
 import base64
 from fpdf import FPDF
 from config import DefaultConfig
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 app = Flask(__name__)
 app.config.from_object(DefaultConfig)
@@ -134,7 +135,7 @@ def download_sample_cv():
     pdf.cell(200, 10, txt="Skills: Python, Flask, Django, SQL, Git", ln=True, align='L')
     pdf.cell(200, 10, txt="Experience: Software Engineer at XYZ (2019 - Present)", ln=True, align='L')
 
-    filepath = os.path.join(UPLOAD_FOLDER, "sample_cv.pdf")
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], "sample_cv.pdf")
     pdf.output(filepath)
     return send_file(filepath, as_attachment=True)
 
