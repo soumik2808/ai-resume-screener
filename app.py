@@ -97,7 +97,6 @@ def screener():
 @app.route('/builder', methods=['GET', 'POST'])
 def builder():
     if request.method == 'POST':
-<<<<<<< Updated upstream
         name = request.form.get('name', '')
         email = request.form.get('email', '')
         phone = request.form.get('phone', '')
@@ -105,18 +104,10 @@ def builder():
         skills = request.form.get('skills', '')
         experience = request.form.get('experience', '')
         education = request.form.get('education', '')
-=======
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        skills = request.form.get('skills')
-        experience = request.form.get('experience')
->>>>>>> Stashed changes
 
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-<<<<<<< Updated upstream
         pdf.cell(200, 10, txt=name, ln=True)
         pdf.cell(200, 10, txt=email, ln=True)
         pdf.cell(200, 10, txt=phone, ln=True)
@@ -130,20 +121,6 @@ def builder():
         response = send_file(file_path, as_attachment=True)
         os.remove(file_path)
         return response
-=======
-
-        pdf.cell(200, 10, txt=name, ln=True, align='L')
-        pdf.cell(200, 10, txt=f"Email: {email} | Phone: {phone}", ln=True, align='L')
-        pdf.cell(200, 10, txt="Skills:", ln=True, align='L')
-        pdf.multi_cell(0, 10, txt=skills)
-        pdf.cell(200, 10, txt="Experience:", ln=True, align='L')
-        pdf.multi_cell(0, 10, txt=experience)
-
-        filepath = os.path.join(UPLOAD_FOLDER, "generated_cv.pdf")
-        pdf.output(filepath)
-
-        return send_file(filepath, as_attachment=True)
->>>>>>> Stashed changes
 
     return render_template("builder.html")
 
